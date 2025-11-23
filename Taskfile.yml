@@ -1,0 +1,53 @@
+version: '3'
+
+vars:
+  binary: myapp
+
+tasks:
+  lint:
+    desc: "Запуск golangci-lint для проверки кода"
+    cmds:
+      - golangci-lint run
+    silent: true
+
+  test:
+    desc: "Запуск всех тестов"
+    cmds:
+      - go test -v ./...
+
+  build:
+    desc: "Сборка исполняемого файла"
+    cmds:
+      - go build -o {{.binary}}
+
+  run:
+    desc: "Запуск приложения"
+    cmds:
+      - go run main.go
+
+  clean:
+    desc: "Удаление скомпилированных файлов"
+    cmds:
+      - rm -f {{.binary}}
+
+  deps-update:
+    desc: "Обновление всех модулей go"
+    cmds:
+      - go get -u ./...
+      - go mod tidy
+
+  fmt:
+    desc: "Форматирование исходного кода"
+    cmds:
+      - go fmt ./...
+
+  vet:
+    desc: "Запуск go vet для статического анализа"
+    cmds:
+      - go vet ./...
+
+  coverage:
+    desc: "Запуск тестов с отчетом покрытия"
+    cmds:
+      - go test -coverprofile=coverage.out ./...
+      - go tool cover -func=coverage.out
