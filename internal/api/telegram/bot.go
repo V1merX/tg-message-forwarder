@@ -53,7 +53,12 @@ func (b *Bot) Start(ctx context.Context) error {
 
 	bh.Handle(b.mh.GetMessage, th.Any())
 
-	go b.mh.MessagePulling(ctx, bot, b.adminID)
+	go func() {
+		if err := b.mh.MessagePulling(ctx, bot, b.adminID); err != nil {
+			b.log.Error("Failed to start message pulling", slog.Any("err", err))
+			return
+		}
+	}()
 
 	b.log.Debug("Start handling updates")
 	if err := bh.Start(); err != nil {

@@ -72,7 +72,12 @@ func (r *MessageRepository) GetMessages(ctx context.Context, messages chan<- []b
 		Topic:   messageTopic,
 		GroupID: "message-puller",
 	})
-	defer reader.Close()
+	defer func() {
+		if err := reader.Close(); err != nil {
+			r.log.Error("Failed to close reader", slog.Any("err", err))
+			return
+		}
+	}()
 
 	r.log.Info("Start consuming messages...")
 	for {

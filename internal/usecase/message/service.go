@@ -20,7 +20,7 @@ func NewService(repo repository.MessageRepository) *Service {
 	}
 }
 
-func (s *Service) SendMessage(ctx context.Context, telegramID int64, telegramUserName string, text string) error {
+func (s *Service) SendMessage(ctx context.Context, telegramID int64, telegramUserName, text string) error {
 	message := entity.Message{
 		ID:               uuid.New(),
 		TelegramID:       telegramID,
