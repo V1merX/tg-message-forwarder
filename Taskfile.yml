@@ -14,40 +14,48 @@ tasks:
     desc: "Запуск всех тестов"
     cmds:
       - go test -v ./...
+    silent: false
 
   build:
     desc: "Сборка исполняемого файла"
     cmds:
       - go build -o {{.binary}}
+    silent: false
 
   run:
     desc: "Запуск приложения"
     cmds:
-      - go run main.go
+      - go run cmd/app/main.go
+    silent: false
 
   clean:
     desc: "Удаление скомпилированных файлов"
     cmds:
       - rm -f {{.binary}}
+    silent: false
 
   deps-update:
     desc: "Обновление всех модулей go"
     cmds:
       - go get -u ./...
       - go mod tidy
+    silent: false
 
   fmt:
     desc: "Форматирование исходного кода"
     cmds:
       - go fmt ./...
+    silent: false
 
   vet:
     desc: "Запуск go vet для статического анализа"
     cmds:
       - go vet ./...
+    silent: false
 
   coverage:
     desc: "Запуск тестов с отчетом покрытия"
     cmds:
       - go test -coverprofile=coverage.out ./...
       - go tool cover -func=coverage.out
+    silent: false
