@@ -10,8 +10,9 @@ import (
 const messageTopic string = "messages"
 
 type MessageRepository struct {
-	conn *kafka.Conn
-	log  *slog.Logger
+	conn        *kafka.Conn
+	log         *slog.Logger
+	kafkaWriter *kafka.Writer
 }
 
 func NewMessageRepository(conn *kafka.Conn, log *slog.Logger) *MessageRepository {
@@ -23,6 +24,12 @@ func NewMessageRepository(conn *kafka.Conn, log *slog.Logger) *MessageRepository
 	if err := msgRepo.createMessageTopic(); err != nil {
 		msgRepo.log.Error("Failed to create topic")
 		panic(err)
+	}
+
+	msgRepo.kafkaWriter = &kafka.Writer{
+		Addr:         msgRepo.conn.RemoteAddr(),
+		Topic:        messageTopic,
+		RequiredAcks: -1,
 	}
 
 	return msgRepo
@@ -43,15 +50,9 @@ func (r MessageRepository) createMessageTopic() error {
 	return err
 }
 
-func (r *MessageRepository) SendMessage(ctx context.Context) error {
-	writer := kafka.Writer{
-		Addr:         r.conn.RemoteAddr(),
-		Topic:        messageTopic,
-		RequiredAcks: -1,
-	}
-
-	err := writer.WriteMessages(ctx, kafka.Message{
-		Value: []byte("new message"),
+func (r *MessageRepository) SendMessage(ctx context.Context, message []byte) error {
+	err := r.kafkaWriter.WriteMessages(ctx, kafka.Message{
+		Value: message,
 	})
 	if err != nil {
 		r.log.Error("Failed to send message to kafka", slog.Any("err", err))
@@ -61,4 +62,26 @@ func (r *MessageRepository) SendMessage(ctx context.Context) error {
 	r.log.Info("Successfull sending message to kafka")
 
 	return nil
+}
+
+func (r *MessageRepository) GetMessages(ctx context.Context, messages chan<- []byte) error {
+	defer close(messages)
+
+	reader := kafka.NewReader(kafka.ReaderConfig{
+		Brokers: []string{r.conn.RemoteAddr().String()},
+		Topic:   messageTopic,
+		GroupID: "message-puller",
+	})
+	defer reader.Close()
+
+	r.log.Info("Start consuming messages...")
+	for {
+		m, err := reader.ReadMessage(ctx)
+		if err != nil {
+			r.log.Error("Failed to read message from 'message' topic", slog.Any("err", err))
+			return err
+		}
+
+		messages <- m.Value
+	}
 }
