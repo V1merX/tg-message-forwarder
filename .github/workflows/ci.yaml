@@ -17,7 +17,7 @@ jobs:
       - name: Установить Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.25'
+          go-version: '1.24'
 
       - name: Кэшировать модули Go
         uses: actions/cache@v3
@@ -30,7 +30,7 @@ jobs:
             ${{ runner.os }}-go-
 
       - name: Установить golangci-lint
-        run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.56.0
+        run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@v2.2.1
       - name: Добавить GOPATH/bin в PATH
         run: echo "$GOPATH/bin" >> $GITHUB_PATH
 
