@@ -10,16 +10,18 @@ import (
 )
 
 type Bot struct {
-	token string
-	log   *slog.Logger
-	mh    api.StartAPI
+	token   string
+	adminID int64
+	log     *slog.Logger
+	mh      api.StartAPI
 }
 
-func NewBot(log *slog.Logger, messageHandler api.StartAPI, token string) *Bot {
+func NewBot(log *slog.Logger, messageHandler api.StartAPI, token string, adminID int64) *Bot {
 	return &Bot{
-		mh:    messageHandler,
-		log:   log,
-		token: token,
+		mh:      messageHandler,
+		log:     log,
+		token:   token,
+		adminID: adminID,
 	}
 }
 
@@ -49,7 +51,14 @@ func (b *Bot) Start(ctx context.Context) error {
 		}
 	}()
 
-	bh.Handle(b.mh.GetMessage, th.AnyCommand())
+	bh.Handle(b.mh.GetMessage, th.Any())
+
+	go func() {
+		if err := b.mh.MessagePulling(ctx, bot, b.adminID); err != nil {
+			b.log.Error("Failed to start message pulling", slog.Any("err", err))
+			return
+		}
+	}()
 
 	b.log.Debug("Start handling updates")
 	if err := bh.Start(); err != nil {

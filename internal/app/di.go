@@ -41,16 +41,16 @@ func (d *diContainer) KafkaConnection() *kafka.Conn {
 	return d.kafkaConn
 }
 
-func (d *diContainer) InitConfig() (*config.Config, error) {
+func (d *diContainer) Config() *config.Config {
 	var err error
 	if d.config == nil {
 		d.config, err = config.MustLoad()
 		if err != nil {
-			return nil, err
+			panic(err)
 		}
 	}
 
-	return d.config, nil
+	return d.config
 }
 
 func (d *diContainer) Logger() *slog.Logger {
@@ -65,11 +65,7 @@ func (d *diContainer) Logger() *slog.Logger {
 
 func (d *diContainer) InitBot() (*telegram.Bot, error) {
 	if d.bot == nil {
-		config, err := d.InitConfig()
-		if err != nil {
-			return nil, err
-		}
-		d.bot = telegram.NewBot(d.Logger(), d.MessageHandler(), config.Bot.Token)
+		d.bot = telegram.NewBot(d.Logger(), d.MessageHandler(), d.Config().Bot.Token, d.Config().Bot.TelegramAdminID)
 	}
 
 	return d.bot, nil
@@ -77,7 +73,7 @@ func (d *diContainer) InitBot() (*telegram.Bot, error) {
 
 func (d *diContainer) MessageHandler() api.StartAPI {
 	if d.messageHandler == nil {
-		d.messageHandler = start.NewHandler(d.MessageService())
+		d.messageHandler = start.NewHandler(d.Logger(), d.MessageService())
 	}
 
 	return d.messageHandler

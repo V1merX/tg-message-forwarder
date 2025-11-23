@@ -1,7 +1,10 @@
 package repository
 
-import "context"
+import (
+	"context"
+)
 
 type MessageRepository interface {
-	SendMessage(ctx context.Context) error
+	SendMessage(ctx context.Context, message []byte) error
+	GetMessages(ctx context.Context, messages chan<- []byte) error
 }
