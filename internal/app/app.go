@@ -57,11 +57,6 @@ func (a *App) initDI() error {
 }
 
 func (a *App) startBot(ctx context.Context) error {
-	_, err := a.diContainer.InitKafka(ctx)
-	if err != nil {
-		panic(err)
-	}
-
 	bot, err := a.diContainer.InitBot()
 	if err != nil {
 		panic(err)
