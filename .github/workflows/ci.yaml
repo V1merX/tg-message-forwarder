@@ -30,10 +30,10 @@ jobs:
             ${{ runner.os }}-go-
 
       - name: Установить golangci-lint
-        run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@v2.2.1
-      - name: Добавить GOPATH/bin в PATH
-        run: echo "$GOPATH/bin" >> $GITHUB_PATH
-
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b ./bin v2.2.1
+      - name: Добавить golangci-lint в PATH
+        run: echo "${{ github.workspace }}/bin" >> $GITHUB_PATH
 
       - name: Запустить линтер
         run: golangci-lint run
