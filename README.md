@@ -25,5 +25,7 @@
 
 Пример файла `.env`:
 
+```
 TELEGRAM_BOT_TOKEN="8267035173:AAEWu-98QKuvwQfXaloNaDsyMRI"
 TELEGRAM_ADMIN_ID="583739"
+```
