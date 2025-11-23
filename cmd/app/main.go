@@ -2,7 +2,8 @@ package main
 
 import (
 	"context"
-	"log"
+	"log/slog"
+	"os"
 
 	"github.com/V1merX/tg-message-forwarder/internal/app"
 )
@@ -13,6 +14,7 @@ func main() {
 	a := app.New()
 
 	if err := a.Run(ctx); err != nil {
-		log.Fatal("Failed to start app")
+		slog.Error("Failed to start app", slog.Any("error", err))
+		os.Exit(1)
 	}
 }
